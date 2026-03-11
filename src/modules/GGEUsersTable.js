@@ -179,31 +179,14 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
                                     {getEnabledPlugins().map(__).join(" ")}
                             </TableCell>
                             <TableCell>
-                                <Box sx={{ display: 'flex' }}>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.aquamarine ? __("aqua") : ""}</Typography>
-                                        <Typography>{status.aquamarine ?? ""}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.level ? __("level") : ""}</Typography>
-                                        <Typography>{status.level ?? ""}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.mead ? __("mead") : ""}</Typography>
-                                        <Typography>{status.mead ?? ""}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.food ? __("food") : ""}</Typography>
-                                        <Typography>{status.food ?? ""}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.coin ? __("coin") : ""}</Typography>
-                                        <Typography>{status.coin ?? ""}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                        <Typography>{status.rubies ? __("rubies") : ""}</Typography>
-                                        <Typography>{status.rubies ?? ""}</Typography>
-                                    </Box>
+                                <Box sx={{ display: 'flex' }}> {
+                                    Object.entries(status).map(([key, value]) => {
+                                        return ['id', 'hasError'].includes(key) ? <></> : <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
+                                            <Typography>{value > 0 ? __(key) : ""}</Typography>
+                                            <Typography>{value > 0 ? value : ""}</Typography>
+                                        </Box>
+                                    })
+                                    }
                                 </Box>
                             </TableCell>
                             <TableCell align="right" padding='none' style={{ padding: "10px" }}>
