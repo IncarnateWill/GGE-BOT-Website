@@ -17,10 +17,11 @@ import MenuItem from '@mui/material/MenuItem'
 import { ErrorType, ActionType, LogLevel } from "../types.js"
 import UserSettings from './userSettings'
 import settings from '../settings.json'
+import { Dialog, DialogContent, DialogTitle, Grid2 } from '@mui/material'
 
-function Log({ws, __}) {
+function Log({ ws, __ }) {
     const [currentLogs, setCurrentLogs] = React.useState([])
-    
+
     React.useEffect(() => {
         const logGrabber = msg => {
             let [err, action, obj] = JSON.parse(msg.data.toString())
@@ -46,9 +47,8 @@ function Log({ws, __}) {
     }, [ws, __])
 
     return (
-        <Paper sx={{ overflow: 'auto'}}>
-            <div onClick={e => e.stopPropagation()}
-                style={{ width: "100%", height: "100%" }}>
+        <Paper sx={{ overflow: 'auto' }}>
+            <div onClick={e => e.stopPropagation()} style={{maxHeight:"80vh",maxWidth:"80vw"}}>
                 <Typography variant="subtitle1" component="div" align='left' padding={"10px"}>
                     {currentLogs}
                 </Typography>
@@ -56,11 +56,11 @@ function Log({ws, __}) {
         </Paper>)
 }
 function Language({ languageCode, setLanguage }) {
-    const [anchorEl, setAnchorEl] = React.useState(null) 
+    const [anchorEl, setAnchorEl] = React.useState(null)
     const open = Boolean(anchorEl)
     const handleClick = event => { setAnchorEl(event.currentTarget) }
     const handleClose = () => { setAnchorEl(null) }
-    
+
     return (
         <>
             <Button
@@ -83,19 +83,58 @@ function Language({ languageCode, setLanguage }) {
                     },
                 }}
             >
-                <MenuItem onClick={() => {setLanguage('en'); handleClose() }}>EN</MenuItem>
-                <MenuItem onClick={() => {setLanguage('pl'); handleClose() }}>PL</MenuItem>
-                <MenuItem onClick={() => {setLanguage('de'); handleClose() }}>DE</MenuItem>
-                <MenuItem onClick={() => {setLanguage('tr'); handleClose() }}>TR</MenuItem>
-                <MenuItem onClick={() => {setLanguage('ar'); handleClose() }}>AR</MenuItem>
-                <MenuItem onClick={() => {setLanguage('cs'); handleClose() }}>CS</MenuItem>
+                <MenuItem onClick={() => { setLanguage('en'); handleClose() }}>EN</MenuItem>
+                <MenuItem onClick={() => { setLanguage('pl'); handleClose() }}>PL</MenuItem>
+                <MenuItem onClick={() => { setLanguage('de'); handleClose() }}>DE</MenuItem>
+                <MenuItem onClick={() => { setLanguage('tr'); handleClose() }}>TR</MenuItem>
+                <MenuItem onClick={() => { setLanguage('ar'); handleClose() }}>AR</MenuItem>
+                <MenuItem onClick={() => { setLanguage('cs'); handleClose() }}>CS</MenuItem>
             </Menu>
         </>
     )
 }
-function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, handleSettingsOpen, handleLogOpen, setSelectedUser, setOpenSettings }) {
-    const [selected, setSelected] = React.useState([])
 
+const assets = 
+    JSON.parse(await (await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/assets.json`)).text())
+
+function Resources({ __, openResources }) {
+    if(openResources == false)
+        return <></>
+    console.log(openResources)
+    for (const key in openResources.resources) {
+        if(isNaN(Number(openResources.resources[key])) || Number(openResources.resources[key]) == 0)
+            delete openResources.resources[key]
+    }
+    delete openResources.resources["coins"]
+    delete openResources.resources["rubies"]
+    function capitalizeFirstLetter(val) {
+        return String(val).charAt(0).toLocaleUpperCase() + String(val).slice(1);
+    }
+    return (
+        <Paper sx={{ overflow: 'auto' }}>
+            <div onClick={e => e.stopPropagation()} style={{maxHeight:"80vh",maxWidth:"80vw",}}>
+                <Grid2 container spacing={3} margin={"32px"}>
+                    {
+                        // openResources.resources
+                        Object.entries(openResources.resources ?? {}).map(([key, value], i) => {
+                            const jsonKey = capitalizeFirstLetter(key)
+                            return <Grid2 key={i}>
+                                <img width="48px" height={"48px"} src={`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/default/assets/${assets[`Collectable_Currency_${jsonKey}`]}.webp`}></img>
+
+                                <Typography variant="subtitle1" component="div" align='center' padding={"10px"}>
+                                    {value}
+                                </Typography>
+                            </Grid2>
+                            })
+                    }
+                </Grid2>
+            </div>
+        </Paper>
+    );
+}
+function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, handleSettingsOpen, handleLogOpen, setSelectedUser, setOpenSettings, handleResourcesOpen }) {
+    const [selected, setSelected] = React.useState([])
+    const [open, setOpen] = React.useState(false)
     const handleSelectAllClick = event => {
         if (event.target.checked) {
             const newSelected = rows.map(n => n.id)
@@ -122,7 +161,7 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
                     <TableCell align="left">{__("name")}</TableCell>
                     <TableCell align="left" padding='none'>{__("plugins")}</TableCell>
                     <TableCell>{__("status")}</TableCell>
-                    <TableCell align='right' padding='none' style={{width:"max-content"}}>
+                    <TableCell align='right' padding='none' style={{ width: "max-content" }}>
                         <Language setLanguage={setLanguage} languageCode={languageCode} />
                         <Button
                             style={{ margin: "10px", maxHeight: '32px', minHeight: '32px' }}
@@ -152,6 +191,7 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
                         row.state = state
 
                         let status = usersStatus[row.id] ?? {}
+
                         return (<TableRow style={status?.hasError ? { border: "red solid 2px" } : {}}
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
@@ -175,21 +215,27 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
                             </TableCell>
                             <TableCell component="th" scope="row">{row.name}</TableCell>
 
-                            <TableCell align="left" padding='none'  sx={{scrollbarColor: "#5e6269 #2d2f31", scrollbarWidth:"thin", maxWidth: "20vw", overflow: "auto", whiteSpace: "nowrap"}}>
-                                    {getEnabledPlugins().map(__).join(" ")}
+                            <TableCell align="left" padding='none' sx={{ scrollbarColor: "#5e6269 #2d2f31", scrollbarWidth: "thin", maxWidth: "20vw", overflow: "auto", whiteSpace: "nowrap" }}>
+                                {getEnabledPlugins().map(__).join(" ")}
                             </TableCell>
                             <TableCell>
                                 <Box sx={{ display: 'flex' }}> {
-                                    Object.entries(status).map(([key, value]) => {
-                                        return ['id', 'hasError'].includes(key) ? <></> : <Box sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
+                                    Object.entries(status).map(([key, value], index) => {
+                                        if (['id', 'hasError'].includes(key))
+                                            value = undefined
+                                        
+                                        return <Box key={index} sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
                                             <Typography>{value > 0 ? __(key) : ""}</Typography>
                                             <Typography>{value > 0 ? value : ""}</Typography>
                                         </Box>
                                     })
-                                    }
+                                }
                                 </Box>
                             </TableCell>
                             <TableCell align="right" padding='none' style={{ padding: "10px" }}>
+                                <Button variant="text" onClick={() => {
+                                    handleResourcesOpen(status)
+                                }}>{__("resources")}</Button>
                                 <Button variant="text" onClick={() => {
                                     ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, row]))
                                     handleLogOpen()
@@ -226,12 +272,13 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
             </TableBody>
         </Table></TableContainer>
 }
-export default function GGEUserTable({setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, plugins}) {
+export default function GGEUserTable({ setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, plugins }) {
     const user = {}
 
     const [openSettings, setOpenSettings] = React.useState(false)
     const [selectedUser, setSelectedUser] = React.useState(user)
     const [openLogs, setOpenLogs] = React.useState(false)
+    const [openResources, setOpenResources] = React.useState(false)
 
     const handleSettingsOpen = () => setOpenSettings(true)
     const handleSettingsClose = () => {
@@ -240,7 +287,8 @@ export default function GGEUserTable({setLanguage, __, languageCode, rows, users
     }
     const handleLogClose = () => setOpenLogs(false)
     const handleLogOpen = () => setOpenLogs(true)
-
+    const handleResourcesClose = () => setOpenResources(false)
+    const handleResourcesOpen = (status) => setOpenResources(status)
     return (
         <>
             <Backdrop
@@ -258,30 +306,40 @@ export default function GGEUserTable({setLanguage, __, languageCode, rows, users
                     __={__} />
             </Backdrop>
             <Backdrop
-            sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
-            open={openLogs}
-            onClick={() => {
-                ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, undefined]))
-                
-                handleLogClose()
-            }}
-            style={{ maxHeight: '100%', overflow: 'auto' }} >
-                <Log ws={ws} __={__}/>
-                </Backdrop>
-            <PlayerTable 
-                setLanguage={setLanguage} 
-                __={__} 
-                languageCode={languageCode} 
-                rows={rows} 
-                usersStatus={usersStatus} 
-                ws={ws} 
+                sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+                open={openLogs}
+                onClick={() => {
+                    ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, undefined]))
+
+                    handleLogClose()
+                }}
+                style={{ maxHeight: '100%', overflow: 'auto' }} >
+                <Log ws={ws} __={__} />
+            </Backdrop>
+            <Backdrop
+                sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+                open={openResources !== false}
+                onClick={() => {
+                    handleResourcesClose()
+                }}
+                style={{ maxHeight: '100%', overflow: 'auto' }} >
+                <Resources usersStatus={usersStatus} __={__}  openResources={openResources}/>
+            </Backdrop>
+            <PlayerTable
+                setLanguage={setLanguage}
+                __={__}
+                languageCode={languageCode}
+                rows={rows}
+                usersStatus={usersStatus}
+                ws={ws}
                 channelInfo={channelInfo}
                 handleSettingsOpen={handleSettingsOpen}
                 handleLogOpen={handleLogOpen}
+                handleResourcesOpen={handleResourcesOpen}
                 setSelectedUser={setSelectedUser}
                 setOpenSettings={setOpenSettings}
                 plugins={plugins}
-                />
+            />
         </>
     )
 }

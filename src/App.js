@@ -13,12 +13,22 @@ function GrabAssets() {
   const [lang, setLang] = React.useState(false)
   const setLanguage = async lang => {
     setCookie("lang", cookies.lang = lang, { maxAge: 31536000 })
-
+    
     try {
-      const response = await fetch(
-        `${window.location.protocol === 'https:' ? "https" : "http"}://${window.location.hostname}:${window.location.port}/locales/${lang}.json`)
-
-      setLang(await response.json())
+      const fetches = await Promise.all([
+      new Promise(async (resolve) => {
+        const version = (await (await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/config/languages/version.json`)).json()).languages[lang]
+        resolve(fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/config/languages/${version}/${lang}.json`))
+      }),
+      fetch(
+        `//${window.location.hostname}:${window.location.port}/locales/${lang}.json`)])
+      const langFile = {}
+      for (let i = 0; i < fetches.length; i++) {
+        const response = fetches[i]
+        
+        Object.assign(langFile, await response.json())
+      }
+      setLang(langFile)
     }
     catch (e) {
       throw new Error("Failed to load language.\n\n" + e)
@@ -37,8 +47,8 @@ function GrabAssets() {
     }} />
   }
   const __ = key => {
-    if(lang[key] == undefined)
-      console.warn(`[Language] ${key} key not found`)
+    // if(lang[key] == undefined)
+      // console.warn(`[Language] ${key} key not found`)
     return lang[key] || key
   }
   return <App setLanguage={setLanguage} languageCode={cookies.lang} __={__} />

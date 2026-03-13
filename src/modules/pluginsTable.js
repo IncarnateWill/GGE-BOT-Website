@@ -19,10 +19,14 @@ import Slider from '@mui/material/Slider'
 import Typography from '@mui/material/Typography'
 import { Container } from '@mui/material'
 
-function PluginOption({ pluginData, channels, userPlugins: userPlugins, plugin, __ }) {
-    const [value, setValue] = React.useState(userPlugins[plugin.key][pluginData.key] ??= pluginData.default)
+function PluginOption({ pluginData, channels, userPlugins, plugin, __ }) {
+    if(pluginData.default != undefined)
+        (userPlugins[plugin.key] ??= {})[pluginData.key] = pluginData.default
+
+    const [value, setValue] = React.useState(userPlugins?.[plugin.key]?.[pluginData.key] ?? pluginData.default)
 
     const onChange = value => {
+        userPlugins[plugin.key] ??= {}
         userPlugins[plugin.key][pluginData.key] = value
         setValue(value)
     }
@@ -38,14 +42,14 @@ function PluginOption({ pluginData, channels, userPlugins: userPlugins, plugin, 
                 variant="outlined"
                 size="small"
                 
-                value={value}
+                value={__(value)}
                 onChange={e => onChange(e.target.value)}
                 sx={{ '& .MuiInputBase-root': { fontSize: '0.75rem' }, '& .MuiInputLabel-root': { fontSize: '0.75rem' }, my: 0.5 }}
             />
         case "Checkbox":
             return <FormControlLabel
                 control={<Checkbox size="small" sx={{ p: 0.5, color: '#90caf9', '&.Mui-checked': { color: '#90caf9' } }} />}
-                label={<Typography variant="body2" sx={{ fontSize: '0.75rem' }}>{__(pluginData.key)}</Typography>}
+                label={<Typography variant="body2" sx={{ fontSize: '0.75rem' }}>{pluginData.hideText ? "" : __(pluginData.key)}</Typography>}
                 
                 checked={Boolean(value)}
                 onChange={(_, newValue) => onChange(newValue)}
@@ -57,7 +61,9 @@ function PluginOption({ pluginData, channels, userPlugins: userPlugins, plugin, 
                 <Table aria-label="simple table" size="small" stickyHeader>
                     <TableHead>
                         <TableRow>
-                            {pluginData.row.map((cRow, i) => <TableCell key={`${cRow}C${i}`} sx={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ccc', bgcolor: '#333', py: 0.5 }}>{cRow}</TableCell>)}
+                            {pluginData.row.map((cRow, i) => 
+                                <TableCell key={i} sx={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#ccc', bgcolor: '#333', py: 0.5 }}>{cRow}</TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -65,9 +71,13 @@ function PluginOption({ pluginData, channels, userPlugins: userPlugins, plugin, 
                             array_chunks(pluginData.data, pluginData.row.length).map((e, i) =>
                                 <TableRow key={i}>
                                     {
-                                        e.map((pluginData, i) =>
-                                            <TableCell key={i} sx={{ py: 0.5 }}>
-                                                <PluginOption pluginData={pluginData} channels={channels} userPlugins={userPlugins} __={__} plugin={plugin} />
+                                        e.map((pluginData, j) => <TableCell key={j} sx={{ py: 0.5 }}>
+                                                 <PluginOption 
+                                                    pluginData={pluginData}
+                                                    channels={channels}
+                                                    userPlugins={userPlugins[plugin.key] ??= {}} 
+                                                    __={__} 
+                                                    plugin={{key : i}}/>
                                             </TableCell>)
                                     }
                                 </TableRow>)

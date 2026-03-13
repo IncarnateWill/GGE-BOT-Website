@@ -16,8 +16,6 @@ import { ErrorType, ActionType } from "../types.js"
 import PluginsTable from './pluginsTable'
 import settings from '../settings.json'
 
-let lang = JSON.parse(await (await fetch(`${window.location.protocol === 'https:' ? "https" : "http"}://${window.location.hostname}:${settings.port ?? window.location.port}/lang.json`)).text())
-
 let servers = new DOMParser()
     .parseFromString(await (await fetch(`${window.location.protocol === 'https:' ? "https" : "http"}://${window.location.hostname}:${settings.port ?? window.location.port}/1.xml`)).text(), "text/xml")
 let instances = []
@@ -78,7 +76,7 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                                 onChange={(newValue) => setServer(newValue.target.value)}
                             >
                                 {
-                                    instances.map((server, i) => <MenuItem value={server.id} key={i}>{lang[server.instanceLocaId] + ' ' + server.instanceName}</MenuItem>)
+                                    instances.map((server, i) => <MenuItem value={server.id} key={i}>{__(server.instanceLocaId) + ' ' + server.instanceName}</MenuItem>)
                                 }
                             </Select>
                         </FormControl>
@@ -90,6 +88,10 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                 <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'flex-end', bgcolor: 'background.paper' }}>
                     <Button variant="contained" color="primary" size='small'
                         onClick={async () => {
+                            for (const key in selectedUser.plugins) {
+                                if(Object.keys(selectedUser.plugins[key]).length == 0)
+                                    delete selectedUser.plugins[key]
+                            }
                             let obj = {
                                 name: name,
                                 pass: pass,
