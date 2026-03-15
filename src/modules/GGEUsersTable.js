@@ -100,7 +100,7 @@ const assets =
 function Resources({ __, openResources, languageCode }) {
     if(openResources == false)
         return <></>
-    const resources = openResources.resources
+    const resources = structuredClone(openResources.resources)
     if(!resources)
         return <></>
     const nameOverrides = {
