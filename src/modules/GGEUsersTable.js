@@ -119,7 +119,7 @@ function Resources({ __, openResources, languageCode }) {
         delete resources[key]
     }
     for (const key in resources) {
-        if(isNaN(Number(openResources.resources[key])) || Number(resources[key]) == 0)
+        if(resources[key] != undefined || Number(resources[key]) == 0)
             delete resources[key]
         else {
             resources[key] = new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])
@@ -149,7 +149,7 @@ function Resources({ __, openResources, languageCode }) {
                 <Grid2 container spacing={3} borderColor={"#323"} margin={"16px"}>
                     {
                         // openResources.resources
-                        Object.entries(openResources.resources ?? {}).map(([key, value], i) => {
+                        Object.entries(resources ?? {}).map(([key, value], i) => {
                             const jsonKey = capitalizeFirstLetter(key)
                             return <Grid2 key={i}>
                                 <div style={{ 
