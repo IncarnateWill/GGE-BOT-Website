@@ -117,6 +117,8 @@ function Resources({ __, openResources: resources, languageCode }) {
         delete resources[key]
     }
     for (const key in resources) {
+        if((isNaN(resources[key]) && typeof resources[key] != "string") || resources[key] == 0) 
+            delete resources[key]
         if (Number(resources[key])) {
             const skipOverrides = {
                 "1MinSkip": 1,
@@ -130,8 +132,6 @@ function Resources({ __, openResources: resources, languageCode }) {
             const value = skipOverrides[key]
             resources[key] = `${value? `${value}x` : ""}${new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])}`
         }
-        else if(undefined == resources[key] || typeof resources[key] === "string") 
-            delete resources[key]
     }
     delete resources["coins"]
     delete resources["rubies"]
