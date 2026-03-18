@@ -117,23 +117,21 @@ function Resources({ __, openResources: resources, languageCode }) {
         delete resources[key]
     }
     for (const key in resources) {
-        if(Number(resources[key]))
-            resources[key] = new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])
+        if (Number(resources[key])) {
+            const skipOverrides = {
+                "1MinSkip": 1,
+                "5MinSkip": 5,
+                "10MinSkip": 10,
+                "30MinSkip": 30,
+                "1HourSkip": 60,
+                "5HourSkip": 5,
+                "24HourSkip": 24,
+            }
+            const value = skipOverrides[key]
+            resources[key] = `${value? `${value}x` : ""}${new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])}`
+        }
         else if(undefined == resources[key] || typeof resources[key] === "string") 
             delete resources[key]
-    }
-    const skipOverrides = {
-        "1MinSkip": 1,
-        "5MinSkip": 5,
-        "10MinSkip": 10,
-        "30MinSkip": 30,
-        "5HourSkip": 5,
-        "24HourSkip": 24,
-    }
-    for (const key in skipOverrides) {
-        const value = skipOverrides[key]
-        if(!isNaN(resources[key]))
-            resources[key] = `${value}x${resources[key]}`
     }
     delete resources["coins"]
     delete resources["rubies"]
