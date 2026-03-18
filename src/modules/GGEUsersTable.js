@@ -125,7 +125,7 @@ function Resources({ __, openResources: resources, languageCode }) {
                 "5MinSkip": 5,
                 "10MinSkip": 10,
                 "30MinSkip": 30,
-                "1HourSkip": 60,
+                "60MinSkip": 60,
                 "5HourSkip": 5,
                 "24HourSkip": 24,
             }
