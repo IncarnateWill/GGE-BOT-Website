@@ -97,12 +97,10 @@ function Language({ languageCode, setLanguage }) {
 const assets = 
     JSON.parse(await (await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/assets.json`)).text())
 
-function Resources({ __, openResources, languageCode }) {
-    if(openResources == false)
-        return <></>
-    const resources = structuredClone(openResources.resources)
+function Resources({ __, openResources: resources, languageCode }) {
     if(!resources)
         return <></>
+    
     const nameOverrides = {
         screws: "component1",
         blackPowder: "component2",
@@ -119,11 +117,10 @@ function Resources({ __, openResources, languageCode }) {
         delete resources[key]
     }
     for (const key in resources) {
-        if(resources[key] != undefined || Number(resources[key]) == 0)
-            delete resources[key]
-        else {
+        if(Number(resources[key]))
             resources[key] = new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])
-        }
+        else if(undefined == resources[key] || typeof resources[key] === "string") 
+            delete resources[key]
     }
     const skipOverrides = {
         "1MinSkip": 1,
@@ -135,7 +132,7 @@ function Resources({ __, openResources, languageCode }) {
     }
     for (const key in skipOverrides) {
         const value = skipOverrides[key]
-        if(resources[key])
+        if(!isNaN(resources[key]))
             resources[key] = `${value}x${resources[key]}`
     }
     delete resources["coins"]
@@ -148,8 +145,7 @@ function Resources({ __, openResources, languageCode }) {
             <div onClick={e => e.stopPropagation()} style={{maxHeight:"80vh",maxWidth:"80vw",}}>
                 <Grid2 container spacing={3} borderColor={"#323"} margin={"16px"}>
                     {
-                        // openResources.resources
-                        Object.entries(resources ?? {}).map(([key, value], i) => {
+                        Object.entries(resources).map(([key, value], i) => {
                             const jsonKey = capitalizeFirstLetter(key)
                             return <Grid2 key={i}>
                                 <div style={{ 
@@ -331,7 +327,7 @@ export default function GGEUserTable({ setLanguage, __, languageCode, rows, user
     const handleLogClose = () => setOpenLogs(false)
     const handleLogOpen = () => setOpenLogs(true)
     const handleResourcesClose = () => setOpenResources(false)
-    const handleResourcesOpen = (status) => setOpenResources(status)
+    const handleResourcesOpen = (status) => setOpenResources(status.resources)
     return (
         <>
             <Backdrop
