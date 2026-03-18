@@ -101,6 +101,9 @@ function Resources({ __, openResources: resources, languageCode }) {
     if(!resources)
         return <></>
     
+    delete resources["coins"]
+    delete resources["rubies"]
+
     const nameOverrides = {
         screws: "component1",
         blackPowder: "component2",
@@ -113,12 +116,16 @@ function Resources({ __, openResources: resources, languageCode }) {
     }
     for (const key in nameOverrides) {
         const value = resources[key]
-        resources[nameOverrides[key]] = value
-        delete resources[key]
+        if(value) {
+            resources[nameOverrides[key]] = value
+            delete resources[key]
+        }
     }
     for (const key in resources) {
-        if(resources[key] == undefined || (isNaN(resources[key]) && typeof resources[key] != "string") || resources[key] == 0) 
+        if([, 0, null].includes(resources[key])) {
             delete resources[key]
+            continue
+        }
         if (Number(resources[key])) {
             const skipOverrides = {
                 "1MinSkip": 1,
@@ -133,8 +140,6 @@ function Resources({ __, openResources: resources, languageCode }) {
             resources[key] = `${value? `${value}x` : ""}${new Intl.NumberFormat(languageCode, { notation: 'compact' }).format(resources[key])}`
         }
     }
-    delete resources["coins"]
-    delete resources["rubies"]
     function capitalizeFirstLetter(val) {
         return String(val).charAt(0).toLocaleUpperCase() + String(val).slice(1);
     }
