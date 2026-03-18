@@ -11,7 +11,7 @@ package-lock.json
 
 # production
 /build
-.needsRebuild
+needsRebuild
 
 # misc
 .DS_Store
