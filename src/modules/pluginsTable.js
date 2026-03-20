@@ -109,7 +109,7 @@ function PluginOption({ pluginData, channels, userPlugins, plugin, __ }) {
         case "Time":
             return <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <TimePicker
-                    label="Controlled picker"
+                    label={__(pluginData.key)}
                     value={value ?? dayjs()}
                     onChange={onChange}
                 />
