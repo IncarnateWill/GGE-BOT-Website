@@ -17,7 +17,9 @@ function GrabAssets() {
     try {
       const fetches = await Promise.all([
       new Promise(async (resolve) => {
-        const version = (await (await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/config/languages/version.json`)).json()).languages[lang]
+        const versionResponse = await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/config/languages/version.json`)
+        const versionData = await versionResponse.json()
+        const version = versionData?.languages?.[lang]
         resolve(fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/config/languages/${version}/${lang}.json`))
       }),
       fetch(
