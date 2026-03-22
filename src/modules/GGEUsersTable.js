@@ -13,12 +13,16 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import Chip from '@mui/material/Chip'
+import Tooltip from '@mui/material/Tooltip'
+import Avatar from '@mui/material/Avatar'
 
 import { ErrorType, ActionType, LogLevel } from "../types.js"
 import UserSettings from './userSettings'
 import settings from '../settings.json'
-import { Dialog, DialogContent, DialogTitle, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 
+/* ── Log Viewer ── */
 function Log({ ws, __ }) {
     const [currentLogs, setCurrentLogs] = React.useState([])
 
@@ -33,13 +37,39 @@ function Log({ ws, __ }) {
                 return
 
             setCurrentLogs(obj[0].splice(obj[1], obj[0].length - 1).concat(obj[0]).map((obj, index) => {
+                const levelColor =
+                    obj[0] === LogLevel.Error ? '#f04a4a' :
+                    obj[0] === LogLevel.Warn  ? '#f5a623' : '#5d6af7'
+
+                const levelLabel =
+                    obj[0] === LogLevel.Error ? 'ERR' :
+                    obj[0] === LogLevel.Warn  ? 'WRN' : 'INF'
+
                 let items = obj[1].map(__).join("")
-                return <div key={index} style={{
-                    color: obj[0] === LogLevel.Error ? "red" :
-                        obj[0] === LogLevel.Warn ? "yellow" : "blue"
-                }}>{items}</div>
-            }
-            ).reverse())
+                return (
+                    <div key={index} style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '10px',
+                        padding: '5px 0',
+                        borderBottom: '1px solid rgba(255,255,255,0.04)',
+                        fontFamily: "'Courier New', monospace",
+                        fontSize: '12px',
+                        lineHeight: '1.5',
+                    }}>
+                        <span style={{
+                            color: levelColor,
+                            fontWeight: 700,
+                            minWidth: '30px',
+                            fontSize: '10px',
+                            marginTop: '2px',
+                            letterSpacing: '0.06em',
+                            opacity: 0.9,
+                        }}>{levelLabel}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.75)', wordBreak: 'break-word' }}>{items}</span>
+                    </div>
+                )
+            }).reverse())
         }
         ws.addEventListener("message", logGrabber)
         return () => ws.removeEventListener("message", logGrabber)
@@ -47,54 +77,114 @@ function Log({ ws, __ }) {
     }, [ws, __])
 
     return (
-        <Paper sx={{ overflow: 'auto' }}>
-            <div onClick={e => e.stopPropagation()} style={{maxHeight:"80vh",maxWidth:"80vw"}}>
-                <Typography variant="subtitle1" component="div" align='left' padding={"10px"}>
-                    {currentLogs}
+        <Paper sx={{
+            overflow: 'auto',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '14px',
+            backgroundColor: '#0d0e14',
+        }}>
+            <Box sx={{
+                px: 2.5,
+                py: 1.5,
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+            }}>
+                <span style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: '#3ecf8e', display: 'inline-block',
+                    boxShadow: '0 0 8px rgba(62,207,142,0.6)',
+                }} />
+                <Typography variant="caption" sx={{
+                    color: '#8b8fa8', fontWeight: 600,
+                    letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.7rem'
+                }}>
+                    Live Logs
                 </Typography>
+            </Box>
+            <div onClick={e => e.stopPropagation()} style={{ maxHeight: "75vh", maxWidth: "80vw", minWidth: "500px", padding: '12px 16px', overflowY: 'auto' }}>
+                {currentLogs.length === 0 ? (
+                    <Typography variant="body2" sx={{ color: '#484c66', textAlign: 'center', py: 4, fontStyle: 'italic' }}>
+                        No logs yet…
+                    </Typography>
+                ) : currentLogs}
             </div>
-        </Paper>)
+        </Paper>
+    )
 }
+
+/* ── Language Selector ── */
 function Language({ languageCode, setLanguage }) {
     const [anchorEl, setAnchorEl] = React.useState(null)
     const open = Boolean(anchorEl)
     const handleClick = event => { setAnchorEl(event.currentTarget) }
     const handleClose = () => { setAnchorEl(null) }
 
+    const languages = [
+        { code: 'en', label: '🇬🇧 EN' },
+        { code: 'pl', label: '🇵🇱 PL' },
+        { code: 'de', label: '🇩🇪 DE' },
+        { code: 'tr', label: '🇹🇷 TR' },
+        { code: 'ar', label: '🇸🇦 AR' },
+        { code: 'cs', label: '🇨🇿 CS' },
+    ]
+
     return (
         <>
             <Button
-                id="basic-button"
-                aria-controls={open ? 'basic-menu' : undefined}
+                id="lang-button"
+                aria-controls={open ? 'lang-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
+                size="small"
+                sx={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#8b8fa8',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '7px',
+                    px: 1.5,
+                    py: 0.5,
+                    minWidth: 'auto',
+                    '&:hover': {
+                        color: '#f0f0f5',
+                        borderColor: 'rgba(93,106,247,0.5)',
+                        backgroundColor: 'rgba(93,106,247,0.08)',
+                    },
+                }}
             >
-                {languageCode}
+                {languageCode?.toUpperCase() ?? 'EN'}
             </Button>
             <Menu
-                id="basic-menu"
+                id="lang-menu"
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
                 slotProps={{
                     list: {
-                        'aria-labelledby': 'basic-button',
+                        'aria-labelledby': 'lang-button',
                     },
                 }}
             >
-                <MenuItem onClick={() => { setLanguage('en'); handleClose() }}>EN</MenuItem>
-                <MenuItem onClick={() => { setLanguage('pl'); handleClose() }}>PL</MenuItem>
-                <MenuItem onClick={() => { setLanguage('de'); handleClose() }}>DE</MenuItem>
-                <MenuItem onClick={() => { setLanguage('tr'); handleClose() }}>TR</MenuItem>
-                <MenuItem onClick={() => { setLanguage('ar'); handleClose() }}>AR</MenuItem>
-                <MenuItem onClick={() => { setLanguage('cs'); handleClose() }}>CS</MenuItem>
+                {languages.map(({ code, label }) => (
+                    <MenuItem
+                        key={code}
+                        onClick={() => { setLanguage(code); handleClose() }}
+                        selected={languageCode === code}
+                        sx={{ fontSize: '0.82rem', gap: 1 }}
+                    >
+                        {label}
+                    </MenuItem>
+                ))}
             </Menu>
         </>
     )
 }
 
-const assets = 
+/* ── Resources Panel ── */
+const assets =
     JSON.parse(await (await fetch(`//${window.location.hostname}:${settings.port ?? window.location.port}/assets.json`)).text())
 
 function Resources({ __, openResources: resources, languageCode }) {
@@ -122,7 +212,7 @@ function Resources({ __, openResources: resources, languageCode }) {
         }
     }
     for (const key in resources) {
-        if([, 0, null].includes(resources[key])) {
+        if([undefined, 0, null].includes(resources[key])) {
             delete resources[key]
             continue
         }
@@ -143,40 +233,77 @@ function Resources({ __, openResources: resources, languageCode }) {
     function capitalizeFirstLetter(val) {
         return String(val).charAt(0).toLocaleUpperCase() + String(val).slice(1);
     }
+
     return (
-        <Paper sx={{ overflow: 'auto' }}>
-            <div onClick={e => e.stopPropagation()} style={{maxHeight:"80vh",maxWidth:"80vw",}}>
-                <Grid container spacing={3} borderColor={"#323"} margin={"16px"}>
+        <Paper sx={{
+            overflow: 'auto',
+            borderRadius: '14px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            backgroundColor: '#13141c',
+        }}>
+            <Box sx={{
+                px: 2.5,
+                py: 1.5,
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+            }}>
+                <Typography variant="caption" sx={{
+                    color: '#8b8fa8', fontWeight: 600,
+                    letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.7rem'
+                }}>
+                    Resources
+                </Typography>
+            </Box>
+            <div onClick={e => e.stopPropagation()} style={{ maxHeight: "78vh", maxWidth: "80vw" }}>
+                <Grid container spacing={2} padding={"20px"}>
                     {
                         Object.entries(resources).map(([key, value], i) => {
                             const jsonKey = capitalizeFirstLetter(key)
                             return <Grid key={i}>
-                                <div style={{ 
-                                    justifyContent: "center", 
-                                    display: "flex", 
-                                    flexDirection:"column",  
-                                    alignItems:"center",
-                                    backgroundColor: "#211f1fff" }}>
-                                    <div style={{ maxHeight: "32px", maxWidth: "32px", overflowWrap: "break-word"}}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid rgba(255,255,255,0.07)',
+                                    borderRadius: '10px',
+                                    padding: '12px',
+                                    minWidth: '70px',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(93,106,247,0.06)',
+                                        borderColor: 'rgba(93,106,247,0.3)',
+                                    },
+                                }}>
+                                    <div style={{ height: "36px", width: "36px", marginBottom: '8px' }}>
                                         <img onError={(e) => {
-                                            e.currentTarget.outerHTML = `<div style="overflow:hidden;max-height:100%;max-width:100%">${__(key)}</div>`
-                                        }} style={{ maxHeight: "100%", maxWidth: "100%"}} src={`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/default/assets/${assets[`Collectable_Currency_${jsonKey}`]}.webp`}></img>
+                                            e.currentTarget.outerHTML = `<div style="height:36px;width:36px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#8b8fa8;text-align:center">${__(key)}</div>`
+                                        }} style={{ height: "100%", width: "100%", objectFit: "contain" }}
+                                        src={`//${window.location.hostname}:${settings.port ?? window.location.port}/ggeProxyEmpire5/default/assets/${assets[`Collectable_Currency_${jsonKey}`]}.webp`}
+                                        alt={__(key)}></img>
                                     </div>
-                                    <Typography variant="subtitle1" component="div" align='center' paddingTop={"16px"}>
+                                    <Typography variant="caption" sx={{ color: '#8b8fa8', fontSize: '0.68rem', mb: 0.3 }}>
+                                        {__(key)}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: '#f0f0f5', fontWeight: 700, fontSize: '0.85rem' }}>
                                         {value}
                                     </Typography>
-                                </div>
+                                </Box>
                             </Grid>
-                            })
+                        })
                     }
                 </Grid>
             </div>
         </Paper>
     );
 }
+
+/* ── Main Player Table ── */
 function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, handleSettingsOpen, handleLogOpen, setSelectedUser, setOpenSettings, handleResourcesOpen }) {
     const [selected, setSelected] = React.useState([])
-    const [open, setOpen] = React.useState(false)
     const handleSelectAllClick = event => {
         if (event.target.checked) {
             const newSelected = rows.map(n => n.id)
@@ -186,134 +313,389 @@ function PlayerTable({ setLanguage, __, languageCode, rows, usersStatus, ws, cha
         setSelected([])
     }
 
-    return <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-                <TableRow>
-                    <TableCell padding="checkbox">
-                        <Checkbox
-                            color="primary"
-                            checked={rows.length === selected.length}
-                            onClick={handleSelectAllClick}
-                            inputProps={{
-                                'aria-label': 'select all entries',
+    return (
+        <Box sx={{ p: { xs: 1, sm: 2 } }}>
+            <TableContainer component={Paper} sx={{
+                borderRadius: '14px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                overflow: 'hidden',
+            }}>
+                {/* Header bar above table */}
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(255,255,255,0.02)',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                }}>
+                    {/* Left: brand */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{
+                            width: 32, height: 32,
+                            borderRadius: '8px',
+                            background: 'linear-gradient(135deg, #5d6af7, #7b5cf5)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 2px 10px rgba(93,106,247,0.4)',
+                        }}>
+                            <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.7rem', lineHeight: 1 }}>G</Typography>
+                        </Box>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: '#f0f0f5', letterSpacing: '-0.01em' }}>
+                            GGE Bot
+                        </Typography>
+                        <Chip
+                            label={`${rows.length} players`}
+                            size="small"
+                            sx={{
+                                height: 20,
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                backgroundColor: 'rgba(93,106,247,0.15)',
+                                color: '#7b87f9',
+                                border: '1px solid rgba(93,106,247,0.25)',
+                                '& .MuiChip-label': { px: 1 },
                             }}
                         />
-                    </TableCell>
-                    <TableCell align="left">{__("name")}</TableCell>
-                    <TableCell align="left" padding='none'>{__("plugins")}</TableCell>
-                    <TableCell>{__("status")}</TableCell>
-                    <TableCell align='right' padding='none' style={{ width: "max-content" }}>
+                    </Box>
+
+                    {/* Right: actions */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Language setLanguage={setLanguage} languageCode={languageCode} />
                         <Button
-                            style={{ margin: "10px", maxHeight: '32px', minHeight: '32px' }}
+                            variant="outlined"
+                            size="small"
                             onClick={async () =>
                                 window.open(`https://discord.com/oauth2/authorize?client_id=${channelInfo[0]}&permissions=8&response_type=code&redirect_uri=${window.location.protocol === 'https:' ? "https" : "http"}%3A%2F%2F${window.location.hostname}%3A${(settings.port ?? window.location.port) !== '' ? (settings.port ?? window.location.port) : window.location.protocol === 'https:' ? "443" : "80"}%2FdiscordAuth&integration_type=0&scope=identify+guilds.join+bot`, "_blank")}
-                        >{__("linkDiscord")}</Button>
-                        <Button style={{ maxWidth: '64px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', marginRight: "10px" }} onClick={handleSettingsOpen}>+</Button>
-                    </TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {rows.map((row, index) => {
-                    function PlayerRow() {
-                        let getEnabledPlugins = () => {
-                            let enabledPlugins = []
-                            Object.entries(row.plugins).forEach(([key, value]) => {
-                                if (Boolean(value.state) === true && Boolean(value.forced) !== true)
-                                    enabledPlugins.push(key)
-                                return
-                            })
-                            return enabledPlugins
-                        }
-
-                        const isItemSelected = selected.includes(row.id)
-                        const labelId = `enhanced-table-checkbox-${index}`
-                        const [state, setState] = React.useState(row.state)
-                        row.state = state
-
-                        let status = usersStatus[row.id] ?? {}
-
-                        return (<TableRow style={status?.hasError ? { border: "red solid 2px" } : {}}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            sx={{
+                                fontSize: '0.75rem',
+                                borderColor: 'rgba(255,255,255,0.12)',
+                                color: '#8b8fa8',
+                                borderRadius: '7px',
+                                px: 1.5,
+                                '&:hover': {
+                                    borderColor: '#5865f2',
+                                    color: '#f0f0f5',
+                                    backgroundColor: 'rgba(88,101,242,0.1)',
+                                },
+                            }}
                         >
+                            {__('"linkDiscord"')}
+                        </Button>
+                        <Tooltip title={__("addPlayer") || "Add player"} placement="bottom">
+                            <Button
+                                variant="contained"
+                                size="small"
+                                onClick={handleSettingsOpen}
+                                sx={{
+                                    minWidth: '32px',
+                                    width: '32px',
+                                    height: '32px',
+                                    p: 0,
+                                    fontSize: '1.2rem',
+                                    lineHeight: 1,
+                                    borderRadius: '8px',
+                                }}
+                            >+</Button>
+                        </Tooltip>
+                    </Box>
+                </Box>
+
+                <Table sx={{ minWidth: 650 }} aria-label="players table">
+                    <TableHead>
+                        <TableRow>
                             <TableCell padding="checkbox">
                                 <Checkbox
                                     color="primary"
-                                    checked={isItemSelected}
-                                    onClick={() => {
-                                        let index = selected.indexOf(row.id)
-                                        if (index < 0) {
-                                            selected.push(row.id)
-                                            setSelected(Array.from(selected))
-                                            return
-                                        }
-                                        setSelected(selected.toSpliced(index, 1))
-                                    }}
+                                    checked={rows.length > 0 && rows.length === selected.length}
+                                    indeterminate={selected.length > 0 && selected.length < rows.length}
+                                    onClick={handleSelectAllClick}
                                     inputProps={{
-                                        'aria-labelledby': labelId,
+                                        'aria-label': 'select all entries',
                                     }}
                                 />
                             </TableCell>
-                            <TableCell component="th" scope="row">{row.name}</TableCell>
-
-                            <TableCell align="left" padding='none' sx={{ scrollbarColor: "#5e6269 #2d2f31", scrollbarWidth: "thin", maxWidth: "20vw", overflow: "auto", whiteSpace: "nowrap" }}>
-                                {getEnabledPlugins().map(__).join(" ")}
-                            </TableCell>
-                            <TableCell>
-                                <Box sx={{ display: 'flex' }}> {
-                                    Object.entries(status).map(([key, value], index) => {
-                                        if (['id', 'hasError'].includes(key))
-                                            value = undefined
-                                        
-                                        return <Box key={index} sx={{ display: 'flex', flexDirection: "column" }} paddingRight={"10px"}>
-                                            <Typography>{value > 0 ? __(key) : ""}</Typography>
-                                            <Typography>{value > 0 ? value : ""}</Typography>
-                                        </Box>
+                            <TableCell align="left">{__("name")}</TableCell>
+                            <TableCell align="left" padding='none'>{__("plugins")}</TableCell>
+                            <TableCell>{__("status")}</TableCell>
+                            <TableCell align='right' padding='none' sx={{ pr: 1.5 }} />
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {rows.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6, color: '#484c66' }}>
+                                    <Typography variant="body2" sx={{ fontSize: '0.85rem', fontStyle: 'italic', color: '#484c66' }}>
+                                        No players yet. Click + to add one.
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {rows.map((row, index) => {
+                            function PlayerRow() {
+                                let getEnabledPlugins = () => {
+                                    let enabledPlugins = []
+                                    Object.entries(row.plugins).forEach(([key, value]) => {
+                                        if (Boolean(value.state) === true && Boolean(value.forced) !== true)
+                                            enabledPlugins.push(key)
+                                        return
                                     })
+                                    return enabledPlugins
                                 }
-                                </Box>
-                            </TableCell>
-                            <TableCell align="right" padding='none' style={{ padding: "10px" }}>
-                                <Button variant="text" onClick={() => {
-                                    handleResourcesOpen(status)
-                                }}>{__("resources")}</Button>
-                                <Button variant="text" onClick={() => {
-                                    ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, row]))
-                                    handleLogOpen()
-                                }}>{__("logs")}</Button>
-                                <Button variant="text" onClick={() => {
-                                    setSelectedUser(row)
-                                    setOpenSettings(true)
-                                }}>{__("settings")}</Button>
-                                <Button variant="contained"
-                                    onClick={() => {
-                                        row.state = !state
-                                        ws.send(JSON.stringify([ErrorType.Success, ActionType.SetUser, row]))
-                                        setState(!state)
-                                    }}
-                                    style={{ maxWidth: '64px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', marginLeft: "10px" }}>{state ? __("stop") : __("start")}</Button>
-                            </TableCell>
-                        </TableRow>)
-                    }
-                    return <PlayerRow key={row.id} />
-                })}
-                <TableRow
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                    <TableCell align='right' padding='none' />
-                    <TableCell align='right' padding='none' />
-                    <TableCell align='right' padding='none' />
-                    <TableCell align='right' padding='none' />
-                    <TableCell align='right' padding='none'>
-                        <Button variant="contained" style={{ maxWidth: '64px', maxHeight: '32px', minWidth: '32px', minHeight: '32px', paddingLeft: "38px", paddingRight: "38px", margin: "10px" }} onClick={() => {
-                            ws.send(JSON.stringify([ErrorType.Success, ActionType.RemoveUser, rows.filter((e) => selected.includes(e.id))]))
-                        }}>{__("remove")}</Button>
-                    </TableCell>
-                </TableRow>
-            </TableBody>
-        </Table></TableContainer>
+
+                                const isItemSelected = selected.includes(row.id)
+                                const labelId = `enhanced-table-checkbox-${index}`
+                                const [state, setState] = React.useState(row.state)
+                                row.state = state
+
+                                let status = usersStatus[row.id] ?? {}
+                                const hasError = status?.hasError
+
+                                return (
+                                    <TableRow
+                                        sx={{
+                                            border: hasError ? '1px solid rgba(240,74,74,0.5)' : 'none',
+                                            backgroundColor: hasError ? 'rgba(240,74,74,0.04)' : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: hasError
+                                                    ? 'rgba(240,74,74,0.07)'
+                                                    : 'rgba(255,255,255,0.03)',
+                                            },
+                                        }}
+                                    >
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                color="primary"
+                                                checked={isItemSelected}
+                                                onClick={() => {
+                                                    let index = selected.indexOf(row.id)
+                                                    if (index < 0) {
+                                                        selected.push(row.id)
+                                                        setSelected(Array.from(selected))
+                                                        return
+                                                    }
+                                                    setSelected(selected.toSpliced(index, 1))
+                                                }}
+                                                inputProps={{
+                                                    'aria-labelledby': labelId,
+                                                }}
+                                            />
+                                        </TableCell>
+
+                                        {/* Player name with avatar */}
+                                        <TableCell component="th" scope="row">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                <Avatar sx={{
+                                                    width: 30,
+                                                    height: 30,
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 700,
+                                                    background: 'linear-gradient(135deg, #5d6af7, #7b5cf5)',
+                                                    boxShadow: '0 2px 8px rgba(93,106,247,0.3)',
+                                                }}>
+                                                    {row.name?.[0]?.toUpperCase() ?? '?'}
+                                                </Avatar>
+                                                <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: '#f0f0f5' }}>
+                                                    {row.name}
+                                                </Typography>
+                                                {hasError && (
+                                                    <Chip
+                                                        label="Error"
+                                                        size="small"
+                                                        sx={{
+                                                            height: 18,
+                                                            fontSize: '0.65rem',
+                                                            backgroundColor: 'rgba(240,74,74,0.15)',
+                                                            color: '#f04a4a',
+                                                            border: '1px solid rgba(240,74,74,0.3)',
+                                                            '& .MuiChip-label': { px: 0.8 },
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        </TableCell>
+
+                                        {/* Plugins */}
+                                        <TableCell
+                                            align="left"
+                                            padding='none'
+                                            sx={{
+                                                maxWidth: "22vw",
+                                                overflow: "hidden",
+                                            }}
+                                        >
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexWrap: 'nowrap',
+                                                gap: 0.5,
+                                                overflow: 'auto',
+                                                scrollbarWidth: 'none',
+                                                '&::-webkit-scrollbar': { display: 'none' },
+                                                py: 0.5,
+                                            }}>
+                                                {getEnabledPlugins().map((plug, i) => (
+                                                    <Chip
+                                                        key={i}
+                                                        label={__(plug)}
+                                                        size="small"
+                                                        sx={{
+                                                            height: 20,
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 500,
+                                                            backgroundColor: 'rgba(93,106,247,0.1)',
+                                                            color: '#7b87f9',
+                                                            border: '1px solid rgba(93,106,247,0.2)',
+                                                            '& .MuiChip-label': { px: 0.8 },
+                                                            whiteSpace: 'nowrap',
+                                                            flexShrink: 0,
+                                                        }}
+                                                    />
+                                                ))}
+                                            </Box>
+                                        </TableCell>
+
+                                        {/* Status */}
+                                        <TableCell>
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                                {Object.entries(status).map(([key, value], index) => {
+                                                    if (['id', 'hasError'].includes(key))
+                                                        value = undefined
+
+                                                    return value > 0 ? (
+                                                        <Box key={index} sx={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            backgroundColor: 'rgba(255,255,255,0.04)',
+                                                            border: '1px solid rgba(255,255,255,0.07)',
+                                                            borderRadius: '7px',
+                                                            px: 1,
+                                                            py: 0.5,
+                                                            minWidth: '44px',
+                                                        }}>
+                                                            <Typography sx={{ color: '#8b8fa8', fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.2 }}>
+                                                                {__(key)}
+                                                            </Typography>
+                                                            <Typography sx={{ color: '#f0f0f5', fontSize: '0.82rem', fontWeight: 700, lineHeight: 1.4 }}>
+                                                                {value}
+                                                            </Typography>
+                                                        </Box>
+                                                    ) : null
+                                                })}
+                                            </Box>
+                                        </TableCell>
+
+                                        {/* Actions */}
+                                        <TableCell align="right" padding='none' sx={{ pr: 1.5 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+                                                <Button
+                                                    variant="text"
+                                                    size="small"
+                                                    onClick={() => handleResourcesOpen(status)}
+                                                    sx={{ fontSize: '0.75rem', px: 1 }}
+                                                >
+                                                    {__("resources")}
+                                                </Button>
+                                                <Button
+                                                    variant="text"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, row]))
+                                                        handleLogOpen()
+                                                    }}
+                                                    sx={{ fontSize: '0.75rem', px: 1 }}
+                                                >
+                                                    {__("logs")}
+                                                </Button>
+                                                <Button
+                                                    variant="text"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        setSelectedUser(row)
+                                                        setOpenSettings(true)
+                                                    }}
+                                                    sx={{ fontSize: '0.75rem', px: 1 }}
+                                                >
+                                                    {__("settings")}
+                                                </Button>
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        row.state = !state
+                                                        ws.send(JSON.stringify([ErrorType.Success, ActionType.SetUser, row]))
+                                                        setState(!state)
+                                                    }}
+                                                    color={state ? "error" : "primary"}
+                                                    sx={{
+                                                        minWidth: '62px',
+                                                        height: '28px',
+                                                        fontSize: '0.72rem',
+                                                        ml: 0.5,
+                                                        ...(state ? {
+                                                            background: 'linear-gradient(135deg, #f04a4a, #c0392b)',
+                                                            boxShadow: '0 3px 10px rgba(240,74,74,0.3)',
+                                                            '&:hover': {
+                                                                background: 'linear-gradient(135deg, #c0392b, #a93226)',
+                                                                boxShadow: '0 4px 16px rgba(240,74,74,0.45)',
+                                                            },
+                                                        } : {}),
+                                                    }}
+                                                >
+                                                    {state ? __("stop") : __("start")}
+                                                </Button>
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            }
+                            return <PlayerRow key={row.id} />
+                        })}
+
+                        {/* Remove row */}
+                        {selected.length > 0 && (
+                            <TableRow>
+                                <TableCell colSpan={4} sx={{ borderBottom: 'none', py: 1 }}>
+                                    <Typography variant="caption" sx={{ color: '#8b8fa8', fontSize: '0.75rem' }}>
+                                        {selected.length} player{selected.length > 1 ? 's' : ''} selected
+                                    </Typography>
+                                </TableCell>
+                                <TableCell align='right' padding='none' sx={{ borderBottom: 'none', pr: 1.5, py: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        color="error"
+                                        sx={{
+                                            background: 'rgba(240,74,74,0.15)',
+                                            color: '#f04a4a',
+                                            border: '1px solid rgba(240,74,74,0.3)',
+                                            boxShadow: 'none',
+                                            fontSize: '0.75rem',
+                                            height: '28px',
+                                            '&:hover': {
+                                                background: 'rgba(240,74,74,0.25)',
+                                                boxShadow: 'none',
+                                            },
+                                        }}
+                                        onClick={() => {
+                                            ws.send(JSON.stringify([ErrorType.Success, ActionType.RemoveUser, rows.filter((e) => selected.includes(e.id))]))
+                                        }}
+                                    >
+                                        {__("remove")}
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
+    )
 }
+
+/* ── Root Export ── */
 export default function GGEUserTable({ setLanguage, __, languageCode, rows, usersStatus, ws, channelInfo, plugins }) {
     const user = {}
 
@@ -331,42 +713,51 @@ export default function GGEUserTable({ setLanguage, __, languageCode, rows, user
     const handleLogOpen = () => setOpenLogs(true)
     const handleResourcesClose = () => setOpenResources(false)
     const handleResourcesOpen = (status) => setOpenResources(status.resources)
+
     return (
         <>
+            {/* Settings Backdrop */}
             <Backdrop
                 sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
                 open={openSettings}
                 onClick={handleSettingsClose}
                 style={{ maxHeight: '100%', overflow: 'auto' }}
-                key={selectedUser.id} >
-                <UserSettings ws={ws}
+                key={selectedUser.id}
+            >
+                <UserSettings
+                    ws={ws}
                     selectedUser={selectedUser}
                     key={selectedUser.id}
                     closeBackdrop={handleSettingsClose}
                     plugins={plugins}
                     channels={channelInfo[1]}
-                    __={__} />
+                    __={__}
+                />
             </Backdrop>
+
+            {/* Logs Backdrop */}
             <Backdrop
                 sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
                 open={openLogs}
                 onClick={() => {
                     ws.send(JSON.stringify([ErrorType.Success, ActionType.GetLogs, undefined]))
-
                     handleLogClose()
                 }}
-                style={{ maxHeight: '100%', overflow: 'auto' }} >
+                style={{ maxHeight: '100%', overflow: 'auto' }}
+            >
                 <Log ws={ws} __={__} />
             </Backdrop>
+
+            {/* Resources Backdrop */}
             <Backdrop
                 sx={theme => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
                 open={openResources !== false}
-                onClick={() => {
-                    handleResourcesClose()
-                }}
-                style={{ maxHeight: '100%', overflow: 'auto' }} >
-                <Resources usersStatus={usersStatus} __={__}  openResources={openResources} languageCode={languageCode}/>
+                onClick={() => handleResourcesClose()}
+                style={{ maxHeight: '100%', overflow: 'auto' }}
+            >
+                <Resources usersStatus={usersStatus} __={__} openResources={openResources} languageCode={languageCode} />
             </Backdrop>
+
             <PlayerTable
                 setLanguage={setLanguage}
                 __={__}
