@@ -17,7 +17,6 @@
 	"started": "Started.",
 	"restartCanceledReasonBotStoppedByUser": "Restart canceled reason: Bot was stopped by user.",
 	"restartDelay": "Bot process exited. Waiting 10 seconds before restart to avoid spam...",
-
 	"name": "Name",
 	"status": "Status",
 	"start": "Start",
@@ -32,10 +31,10 @@
 	"server": "Server",
 	"plugins": "Plugins",
 	"system": "System",
-
-	"feast" : "Feast",
-	"meadReplace" : "Mead Replace",
-	"resourceSend" : "Resource Send",
+	"feast": "Feast",
+	"meadReplace": "Mead Replace",
+	"soldersReplace": "Mead Soldier Replace",
+	"resourceSend": "Resource Send",
 	"timer": "Timer",
 	"attack": "Attack",
 	"sharedBarronAttackLogic": "Barron",
@@ -159,7 +158,6 @@
 	"loading": "loading...",
 	"couldntFindSkip": "Couldn't find skip",
 	"couldntRecruitMoreTroops": "Could not recruit more troops",
-
 	"horseSettings": "Horse Settings",
 	"attackSettings": "Attack Settings",
 	"useFeather": "Use feather",
@@ -182,7 +180,7 @@
 	"minimumFood": "Minimum food",
 	"minimumFoodRate": "Minimum food rate",
 	"hours": "Hours",
-	"commanderWhiteList" : "Commander Whitelist",
+	"commanderWhiteList": "Commander Whitelist",
 	"attackWaves": "Waves",
 	"noEventTools": "No event tools",
 	"lowValueChests": "Low value chests First",
@@ -223,5 +221,14 @@
 	"incomingFrom": " from ",
 	"incomingIsAttacking": " is attacking ",
 	"incomingIn": " incoming in ",
-	"incomingClicks" : " clicks"
+	"incomingClicks": " clicks",
+	"soldierSettings": "Soldier Settings",
+	"sendMeadRangers": "Send Mead Rangers",
+	"sendSoldierInterval": "Check Interval (min)",
+	"meadSettings": "Mead Settings",
+	"sendMead": "Send Mead",
+	"ATTACK_TOO_MANY_UNITS": "Too many units assigned to the attack",
+	"COOLING_DOWN": "Target is cooling down",
+	"LORD_IS_USED": "Commander is already in use",
+	"CANT_START_NEW_ARMIES": "Maximum number of attacks reached"
 }
