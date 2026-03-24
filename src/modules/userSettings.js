@@ -3,7 +3,6 @@ import Checkbox from '@mui/material/Checkbox'
 import TextField from '@mui/material/TextField'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
-import FormGroup from '@mui/material/FormGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
@@ -12,6 +11,7 @@ import InputLabel from '@mui/material/InputLabel'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
+import { useMediaQuery, useTheme } from '@mui/material'
 
 import { ErrorType, ActionType } from "../types.js"
 import PluginsTable from './pluginsTable'
@@ -51,6 +51,8 @@ for (var key in _instances) {
 }
 
 export default function UserSettings({ __, selectedUser, channels, plugins, ws, closeBackdrop }) {
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
     selectedUser.name ??= ""
     selectedUser.plugins ??= {}
     const isNewUser = selectedUser.name === ""
@@ -65,196 +67,200 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
     const saveLabel = __("save")
 
     return (
-        <div onClick={event => event.stopPropagation()} style={{ width: 'max-content' }}>
+        <div onClick={event => event.stopPropagation()} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Paper sx={{
-                maxHeight: '92vh',
+                maxHeight: '94vh',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                width: { xs: '95vw', sm: '80vw' },
-                maxWidth: '900px',
-                borderRadius: '16px',
-                border: '1px solid rgba(255,255,255,0.09)',
-                boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
-                backgroundColor: '#13141c',
+                width: { xs: '96vw', sm: '85vw', md: '750px' },
+                borderRadius: '20px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 32px 80px rgba(0,0,0,0.7)',
+                backgroundColor: 'rgba(19, 20, 28, 0.9)',
+                backdropFilter: 'blur(20px)',
             }}>
                 {/* ── Header ── */}
                 <Box sx={{
-                    px: 3,
-                    py: 2,
-                    borderBottom: '1px solid rgba(255,255,255,0.07)',
-                    background: 'rgba(255,255,255,0.02)',
+                    px: { xs: 2, sm: 3 },
+                    py: 2.5,
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.03)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1.5,
+                    gap: 2,
                     flexShrink: 0,
                 }}>
                     <Box sx={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '7px',
+                        width: 36,
+                        height: 36,
+                        borderRadius: '10px',
                         background: 'linear-gradient(135deg, #5d6af7, #7b5cf5)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 2px 8px rgba(93,106,247,0.4)',
+                        boxShadow: '0 4px 12px rgba(93,106,247,0.4)',
                         flexShrink: 0,
                     }}>
-                        <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '0.7rem' }}>
+                        <Typography sx={{ color: '#fff', fontWeight: 900, fontSize: '0.9rem' }}>
                             {isNewUser ? '+' : (selectedUser.name?.[0]?.toUpperCase() ?? '?')}
                         </Typography>
                     </Box>
                     <Box>
                         <Typography sx={{
-                            fontWeight: 700,
-                            fontSize: '0.95rem',
+                            fontWeight: 800,
+                            fontSize: '1.05rem',
                             color: '#f0f0f5',
-                            lineHeight: 1.2,
+                            lineHeight: 1.1,
+                            letterSpacing: '-0.01em',
                         }}>
                             {isNewUser ? (__("addPlayer") || "Add Player") : `${__("settings")} – ${selectedUser.name}`}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.72rem', color: '#484c66', lineHeight: 1 }}>
-                            {isNewUser ? "Configure a new bot account" : "Edit account configuration"}
+                        <Typography sx={{ fontSize: '0.75rem', color: '#8b8fa8', fontWeight: 500, mt: 0.3 }}>
+                            {isNewUser ? "Configure a new bot account" : "Manage account configuration"}
                         </Typography>
                     </Box>
                 </Box>
 
                 {/* ── Body ── */}
-                <Box sx={{ p: 2.5, flexGrow: 1, overflowY: 'auto' }}>
+                <Box sx={{ p: { xs: 2, sm: 3 }, flexGrow: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: '5px' } }}>
                     {/* Account details section */}
-                    <Typography variant="caption" sx={{
-                        color: '#5d6af7',
-                        fontWeight: 700,
-                        fontSize: '0.68rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
-                        display: 'block',
-                        mb: 1.5,
-                    }}>
-                        Account Details
-                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="overline" sx={{
+                            color: '#5d6af7',
+                            fontWeight: 800,
+                            fontSize: '0.7rem',
+                            letterSpacing: '0.12em',
+                            display: 'block',
+                            mb: 2,
+                        }}>
+                            Account Details
+                        </Typography>
 
-                    <FormGroup
-                        row={true}
-                        sx={{ mb: 3, gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}
-                    >
-                        <TextField
-                            required
-                            size="small"
-                            label={usernameLabel}
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            disabled={!isNewUser}
-                            sx={{ minWidth: 160, flex: '1 1 160px' }}
-                        />
-                        <TextField
-                            required
-                            size="small"
-                            label={passwordLabel}
-                            type='password'
-                            value={pass}
-                            onChange={e => setPass(e.target.value)}
-                            sx={{ minWidth: 160, flex: '1 1 160px' }}
-                        />
+                        <Box sx={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
+                            gap: 2,
+                            alignItems: 'flex-start'
+                        }}>
+                            <TextField
+                                required
+                                fullWidth
+                                size="small"
+                                label={usernameLabel}
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                disabled={!isNewUser}
+                            />
+                            <TextField
+                                required
+                                fullWidth
+                                size="small"
+                                label={passwordLabel}
+                                type='password'
+                                value={pass}
+                                onChange={e => setPass(e.target.value)}
+                            />
 
-                        <FormControl size="small" sx={{ minWidth: 180, flex: '2 1 180px' }}>
-                            <InputLabel required id="server-select-label">{serverLabel}</InputLabel>
-                            <Select
-                                labelId="server-select-label"
-                                id="server-select"
-                                value={server}
-                                label={serverLabel}
-                                onChange={(newValue) => setServer(newValue.target.value)}
-                            >
-                                {
-                                    instances.map((server, i) => (
-                                        <MenuItem value={server.id} key={i}>
-                                            {__(server.instanceLocaId) + ' ' + server.instanceName}
-                                        </MenuItem>
-                                    ))
+                            <FormControl fullWidth size="small">
+                                <InputLabel required id="server-select-label">{serverLabel}</InputLabel>
+                                <Select
+                                    labelId="server-select-label"
+                                    id="server-select"
+                                    value={server}
+                                    label={serverLabel}
+                                    onChange={(newValue) => setServer(newValue.target.value)}
+                                >
+                                    {
+                                        instances.map((server, i) => (
+                                            <MenuItem value={server.id} key={i}>
+                                                {__(server.instanceLocaId) + ' ' + server.instanceName}
+                                            </MenuItem>
+                                        ))
+                                    }
+                                </Select>
+                            </FormControl>
+
+                            <FormControlLabel
+                                sx={{
+                                    m: 0,
+                                    px: 2,
+                                    py: 0.8,
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    borderRadius: '10px',
+                                    backgroundColor: 'rgba(255,255,255,0.03)',
+                                    transition: 'all 0.2s ease',
+                                    height: '40px',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(93,106,247,0.08)',
+                                        borderColor: 'rgba(93,106,247,0.3)',
+                                    },
+                                }}
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        sx={{ p: 0.5, mr: 0.5 }}
+                                    />
                                 }
-                            </Select>
-                        </FormControl>
+                                checked={externalEvent}
+                                onChange={e => setExternalEvent(e.target.checked)}
+                                label={
+                                    <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#c0c4d8' }}>
+                                        OR / BTH Protocol
+                                    </Typography>
+                                }
+                            />
+                        </Box>
+                    </Box>
 
-                        <FormControlLabel
-                            sx={{
-                                m: 0,
-                                px: 1.5,
-                                py: 0.7,
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: '8px',
-                                backgroundColor: 'rgba(255,255,255,0.03)',
-                                flexShrink: 0,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(93,106,247,0.06)',
-                                    borderColor: 'rgba(93,106,247,0.25)',
-                                },
-                            }}
-                            control={
-                                <Checkbox
-                                    size="small"
-                                    sx={{ p: 0.5, mr: 0.5 }}
-                                />
-                            }
-                            checked={externalEvent}
-                            onChange={e => setExternalEvent(e.target.checked)}
-                            label={
-                                <Typography variant="body2" sx={{ fontSize: '0.78rem', fontWeight: 500, color: '#c0c4d8' }}>
-                                    OR / BTH
-                                </Typography>
-                            }
-                        />
-                    </FormGroup>
-
-                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.07)', mb: 2 }} />
+                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.07)', my: 4 }} />
 
                     {/* Plugins section */}
-                    <Typography variant="caption" sx={{
-                        color: '#5d6af7',
-                        fontWeight: 700,
-                        fontSize: '0.68rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
-                        display: 'block',
-                        mb: 1.5,
-                    }}>
-                        Plugins
-                    </Typography>
+                    <Box>
+                        <Typography variant="overline" sx={{
+                            color: '#5d6af7',
+                            fontWeight: 800,
+                            fontSize: '0.7rem',
+                            letterSpacing: '0.12em',
+                            display: 'block',
+                            mb: 2,
+                        }}>
+                            Automation Plugins
+                        </Typography>
 
-                    <PluginsTable
-                        plugins={plugins}
-                        userPlugins={selectedUser.plugins}
-                        channels={channels}
-                        __={__}
-                    />
+                        <PluginsTable
+                            plugins={plugins}
+                            userPlugins={selectedUser.plugins}
+                            channels={channels}
+                            __={__}
+                        />
+                    </Box>
                 </Box>
 
                 {/* ── Footer ── */}
                 <Box sx={{
-                    px: 3,
-                    py: 2,
-                    borderTop: '1px solid rgba(255,255,255,0.07)',
+                    px: { xs: 2, sm: 3 },
+                    py: 2.5,
+                    borderTop: '1px solid rgba(255,255,255,0.08)',
                     display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    background: 'rgba(255,255,255,0.015)',
+                    background: 'rgba(255,255,255,0.02)',
                     flexShrink: 0,
                     gap: 2,
                 }}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#484c66' }}>
-                        {isNewUser ? "Fill all required fields marked with *" : `Editing: ${selectedUser.name}`}
+                    <Typography sx={{ fontSize: '0.8rem', color: '#8b8fa8', fontWeight: 500 }}>
+                        {isNewUser ? "Required fields marked with *" : `Configuration for ${selectedUser.name}`}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
                         <Button
                             variant="outlined"
-                            size="small"
+                            fullWidth={isMobile}
                             onClick={closeBackdrop}
                             sx={{
-                                fontSize: '0.8rem',
-                                borderColor: 'rgba(255,255,255,0.12)',
+                                px: 3,
                                 color: '#8b8fa8',
-                                '&:hover': {
-                                    borderColor: 'rgba(255,255,255,0.2)',
-                                    backgroundColor: 'rgba(255,255,255,0.05)',
-                                },
+                                borderColor: 'rgba(255,255,255,0.15)',
+                                '&:hover': { borderColor: '#fff' }
                             }}
                         >
                             Cancel
@@ -262,11 +268,11 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                         <Button
                             variant="contained"
                             color="primary"
-                            size='small'
-                            sx={{ fontSize: '0.8rem', minWidth: '80px' }}
+                            fullWidth={isMobile}
+                            sx={{ px: 4, boxShadow: '0 4px 14px rgba(93,106,247,0.4)' }}
                             onClick={async () => {
                                 for (const key in selectedUser.plugins) {
-                                    if (Object.keys(selectedUser.plugins[key]).length == 0)
+                                    if (Object.keys(selectedUser.plugins[key]).length === 0)
                                         delete selectedUser.plugins[key]
                                 }
                                 let obj = {
