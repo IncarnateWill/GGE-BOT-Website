@@ -26,12 +26,11 @@ for (var key in _instances) {
     let obj = _instances[key]
 
     let server, zone, instanceLocaId, instanceName
-    
+
     for (var key2 in obj.childNodes) {
         let obj2 = obj.childNodes[key2]
-        
-        switch(obj2.nodeName) 
-        {
+
+        switch (obj2.nodeName) {
             case "server":
                 server = obj2.childNodes[0].nodeValue
                 break
@@ -47,8 +46,8 @@ for (var key in _instances) {
             default:
         }
     }
-    if(instanceLocaId)
-        instances.push({id: obj.getAttribute("value"),server,zone,instanceLocaId,instanceName})
+    if (instanceLocaId)
+        instances.push({ id: obj.getAttribute("value"), server, zone, instanceLocaId, instanceName })
 }
 
 export default function UserSettings({ __, selectedUser, channels, plugins, ws, closeBackdrop }) {
@@ -62,8 +61,8 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
 
     const usernameLabel = __("username")
     const passwordLabel = __("password")
-    const serverLabel   = __("server")
-    const saveLabel     = __("save")
+    const serverLabel = __("server")
+    const saveLabel = __("save")
 
     return (
         <div onClick={event => event.stopPropagation()} style={{ width: 'max-content' }}>
@@ -155,7 +154,7 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                             onChange={e => setPass(e.target.value)}
                             sx={{ minWidth: 160, flex: '1 1 160px' }}
                         />
-                        
+
                         <FormControl size="small" sx={{ minWidth: 180, flex: '2 1 180px' }}>
                             <InputLabel required id="server-select-label">{serverLabel}</InputLabel>
                             <Select
@@ -267,7 +266,7 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                             sx={{ fontSize: '0.8rem', minWidth: '80px' }}
                             onClick={async () => {
                                 for (const key in selectedUser.plugins) {
-                                    if(Object.keys(selectedUser.plugins[key]).length == 0)
+                                    if (Object.keys(selectedUser.plugins[key]).length == 0)
                                         delete selectedUser.plugins[key]
                                 }
                                 let obj = {
@@ -275,7 +274,8 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                                     pass: pass,
                                     server: server,
                                     plugins: selectedUser.plugins,
-                                    externalEvent: externalEvent
+                                    externalEvent: externalEvent,
+                                    state: selectedUser.state
                                 }
                                 if (!isNewUser) {
                                     obj.id = selectedUser.id
