@@ -97,7 +97,8 @@ export default function UserSettings({ __, selectedUser, channels, plugins, ws, 
                                 pass: pass,
                                 server: server,
                                 plugins: selectedUser.plugins,
-                                externalEvent: externalEvent
+                                externalEvent: externalEvent,
+                                state: selectedUser.state
                             }
                             if (!isNewUser) {
                                 obj.id = selectedUser.id
