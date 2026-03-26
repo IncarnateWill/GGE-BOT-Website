@@ -1,33 +1,79 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="js/index.js"></script>
+    <meta name="theme-color" content="#0d0e14" />
+    <meta name="description" content="GGE Bot – Sign in to your account" />
+    <title>GGE Bot – Sign In</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
+    <script src="js/index.js"></script>
 </head>
-<div class="front-panel-anchor ">
+
+<body>
+<div class="front-panel-anchor">
     <div class="front-panel">
+        <!-- Top nav -->
         <div class="banner">
-            <a href="signup.html" style="text-align: left; margin:10px">Sign Up</a>
+            <span style="font-size:13px;font-weight:600;color:#8b8fa8;letter-spacing:0.04em;text-transform:uppercase;">GGE BOT</span>
+            <a href="signup.html">Create Account</a>
         </div>
-        <img src="logo192.png" class="ashes-logo" alt="">
+
+        <!-- Logo -->
+        <img src="logo192.png" class="ashes-logo" alt="GGE Bot Logo">
+
+        <!-- Heading -->
+        <p class="panel-title">Welcome back</p>
+        <p class="panel-subtitle">Sign in to manage your bot</p>
+
+        <!-- Login Form -->
         <form id="login-form">
             <div class="input-field-container">
                 <div class="login-info-banner" id="login-info-banner"></div>
-                <li><input type="text" class="input-field" id="email_name" placeholder="Username"></li>
-                <li><input type="password" class="input-field" id="password" placeholder="Password"></li>
+
                 <li>
-                    <div class="remember-password"><input type="checkbox" id="remember-password"><span>Remember
-                            Password</span></div>
+                    <input
+                        type="text"
+                        class="input-field"
+                        id="email_name"
+                        placeholder="Username"
+                        autocomplete="username"
+                        spellcheck="false"
+                    >
                 </li>
-                <li><button type="submit" class="signin-signout">Login</button></li>
+                <li>
+                    <input
+                        type="password"
+                        class="input-field"
+                        id="password"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                    >
+                </li>
+                <li>
+                    <div class="remember-password">
+                        <input type="checkbox" id="remember-password">
+                        <span>Remember me for 1 year</span>
+                    </div>
+                </li>
+                <li>
+                    <button type="submit" class="signin-signout" id="signin-btn">Sign In</button>
+                </li>
             </div>
         </form>
+
+        <!-- Footer -->
         <div class="footer">
-            <div><a href="signup.html" style="text-align: right; margin:10px">Forgot Password</a></div>
-            <div><a href="privacypolicy.html">Privacy policy</a></div>
+            <div><a href="signup.html">Forgot Password?</a></div>
+            <div><a href="privacypolicy.html">Privacy Policy</a></div>
         </div>
     </div>
 </div>
 
+</body>
 </html>

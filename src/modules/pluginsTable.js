@@ -6,7 +6,6 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Select from '@mui/material/Select'
 import Box from '@mui/material/Box'
@@ -17,7 +16,7 @@ import TextField from '@mui/material/TextField'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Slider from '@mui/material/Slider'
 import Typography from '@mui/material/Typography'
-import { Container } from '@mui/material'
+import { Switch, Chip } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
@@ -129,40 +128,56 @@ const PluginOptionContainer = ({ plugin, channels, userPlugins, __ }) => {
 function Plugin({ plugin, __, userPlugins, selectedPlugin, setSelectedPlugin }) {
     userPlugins[plugin.key] ??= {}
     const [state, setState] = React.useState(userPlugins[plugin.key].state)
+    const isSelected = plugin === selectedPlugin
+
     function onClick() {
-        if(plugin.pluginOptions?.length > 0)
+        if (plugin.pluginOptions?.length > 0)
             setSelectedPlugin(plugin)
     }
+
     return (
         <TableRow
-            sx={ plugin != selectedPlugin ? {
-                '&:nth-of-type(odd)': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
-                },
+            onClick={onClick}
+            sx={{
+                cursor: plugin.pluginOptions?.length > 0 ? 'pointer' : 'default',
+                backgroundColor: isSelected ? 'rgba(93, 106, 247, 0.12)' : 'transparent',
                 '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                }
-                
-            }: {
-                backgroundColor: "#375377"
+                    backgroundColor: isSelected ? 'rgba(93, 106, 247, 0.18)' : 'rgba(255, 255, 255, 0.02)',
+                },
+                transition: 'all 0.15s ease',
+            }}
+        >
+            <TableCell sx={{ 
+                fontWeight: 600, 
+                color: isSelected ? '#7b87f9' : '#f0f0f5',
+                fontSize: '0.8rem',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                py: 1.2,
+                pl: 2
             }}>
-            <TableCell onClick={onClick} sx={{ fontWeight: 'bold'}}>{__(plugin.key)}</TableCell>
-            <TableCell align='right'>
+                {__(plugin.key.charAt(0).toUpperCase() + plugin.key.slice(1)) || __(plugin.key)}
+                {plugin.pluginOptions?.length > 0 && (
+                    <Typography variant="caption" sx={{ display: 'block', color: '#6d7085', fontWeight: 500, fontSize: '0.6rem', mt: 0.2 }}>
+                        {isSelected ? "Editing options..." : "Click to edit options"}
+                    </Typography>
+                )}
+            </TableCell>
+            <TableCell align='right' sx={{ borderBottom: '1px solid rgba(255,255,255,0.05)', py: 1.5 }}>
                 {!plugin.force ?
-                    <Button
-                        variant={state ? "contained" : "outlined"}
-                        color={state ? "error" : "success"}
+                    <Switch
                         size="small"
-                        sx={{ minWidth: '70px', height: '28px', fontSize: '0.75rem' }}
-                        onClick={() => {
-                            setState(!state)
-                            userPlugins[plugin.key].state = !state
-                        }}>
-                        {__(state ? "stop" : "start")}
-                    </Button> : <Button
-                        size="small"
-                        sx={{ minWidth: '70px', height: '28px', fontSize: '0.75rem' }}
-                        disabled />
+                        checked={state}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                            setState(e.target.checked)
+                            userPlugins[plugin.key].state = e.target.checked
+                        }}
+                        sx={{
+                            '& .MuiSwitch-switchBase.Mui-checked': { color: '#5d6af7' },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#5d6af7' }
+                        }}
+                    /> : 
+                    <Chip label="Forced" size="small" sx={{ height: 18, fontSize: '0.6rem', opacity: 0.6 }} />
                 }
             </TableCell>
         </TableRow>
@@ -172,9 +187,23 @@ export default function PluginsTable({ __, userPlugins, plugins, channels }) {
     const [selectedPlugin, setSelectedPlugin] = React.useState(undefined) //, maxHeight: "40vh"
 
     return (
-        <Paper elevation={3} style={{ minHeight: "45vh", maxHeight: "65vh", backgroundColor: '#131313', display:"flex", flexDirection:"column"}} >
-            <TableContainer sx={{ scrollbarColor: "#5e6269 #2d2f31"}}>
-                <Table aria-label="plugins table">
+        <Paper elevation={0} sx={{ 
+            minHeight: "40vh", 
+            maxHeight: "80vh", 
+            backgroundColor: 'rgba(255,255,255,0.02)', 
+            display:"flex", 
+            flexDirection:"column",
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.08)',
+            overflow: 'hidden'
+        }} >
+            <TableContainer sx={{ 
+                flex: "0 0 220px",
+                overflowY: 'auto',
+                '&::-webkit-scrollbar': { width: '3px' },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '10px' }
+            }}>
+                <Table stickyHeader aria-label="plugins table" size="small">
                     <TableBody>
                         {plugins.map((plugin, index) =>
                             <Plugin
@@ -188,13 +217,24 @@ export default function PluginsTable({ __, userPlugins, plugins, channels }) {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Container sx={{scrollbarColor: "#5e6269 #2d2f31", minWidth:"100%", minHeight: "25vh", maxHeight: "25vh", overflowY:"auto", flex: "0 0 90%", borderTop: "solid #1b1b1b 3px"}}>
+            <Box sx={{
+                minWidth:"100%", 
+                flex: 1,
+                overflowY:"auto", 
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                background: 'rgba(255,255,255,0.01)',
+                p: { xs: 1, sm: 1.5 },
+                '&::-webkit-scrollbar': { width: '3px' },
+                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '10px' }
+            }}>
                 {
                     selectedPlugin ?
                         <PluginOptionContainer userPlugins={userPlugins} channels={channels} __={__} plugin={selectedPlugin} /> :
-                        undefined
+                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+                            <Typography variant="body2" sx={{ fontStyle: 'italic', fontSize: '0.75rem' }}>Select a plugin to configure its options</Typography>
+                        </Box>
                 }
-            </Container>
+            </Box>
         </Paper>
     )
-}
+}
